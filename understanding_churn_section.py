@@ -3,8 +3,9 @@ import numpy as np
 import streamlit as st
 import datarobot as dr
 import pandas as pd
-from datarobot.models.deployment import Deployment
 from typing import Tuple, Dict
+
+from project_metadata import dataset_id, deployment_id, target_name
 
 alt.themes.enable("fivethirtyeight")
 
@@ -14,7 +15,7 @@ def get_feature_impact(model: dr.Model) -> alt.Chart:
     # TODO: Better formatting of variable names
     # TODO: Limit number of rows
     out = (
-        alt.Chart(feature_impacts, title="Churn Drivers")
+        alt.Chart(feature_impacts, title="Relative Importance of Different Drivers")
         .mark_bar()
         .encode(
             alt.X("impactNormalized:Q", title=None),
@@ -79,7 +80,7 @@ def get_raw_data() -> pd.DataFrame:
 
 
 @st.cache
-def get_preds(deployment_id: str, data: pd.DataFrame) -> pd.DataFrame:
+def get_preds(data: pd.DataFrame) -> pd.DataFrame:
     # I considered model.request_training_predictions(dr.enums.DATA_SUBSET.HOLDOUT)
     # but it throws exception if called more than once & I don't see how to get prev results
 
@@ -96,11 +97,12 @@ def get_preds(deployment_id: str, data: pd.DataFrame) -> pd.DataFrame:
 
 @st.cache
 def get_confusion_matrix(preds: pd.DataFrame, threshold: float) -> Dict[str, int]:
-    preds["take_action"] = preds.predicted_churn_prob > threshold
+    preds_copy = preds.copy()
+    preds_copy["take_action"] = preds.predicted_churn_prob > threshold
     confusion_matrix = {
-        "True Positive": preds.query("take_action & Churn").shape[0],
-        "False Positive": preds.query("take_action & (not Churn)").shape[0],
-        "True Negative": preds.query("(not take_action) & (not Churn)").shape[0],
-        "False Negative": preds.query("(not take_action) & Churn").shape[0],
+        "True Positive": preds_copy.query("take_action & Churn").shape[0],
+        "False Positive": preds_copy.query("take_action & (not Churn)").shape[0],
+        "True Negative": preds_copy.query("(not take_action) & (not Churn)").shape[0],
+        "False Negative": preds_copy.query("(not take_action) & Churn").shape[0],
     }
     return confusion_matrix
