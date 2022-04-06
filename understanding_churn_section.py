@@ -1,9 +1,11 @@
 import altair as alt
-import numpy as np
-import streamlit as st
 import datarobot as dr
+import numpy as np
 import pandas as pd
-from typing import Tuple, Dict
+
+import streamlit as st
+from typing import Dict
+
 
 from project_metadata import dataset_id, deployment_id, target_name
 
@@ -75,6 +77,7 @@ def get_raw_data() -> pd.DataFrame:
     # It's reading full data basically as a workaround for https://datarobot.atlassian.net/browse/DSX-2141
     # Everything we do will be in sample, and this is hard to generalize to new projects
     dataset = dr.Dataset.get(dataset_id)
+    # This temp.csv step is a hack around the python client not returning a DataFrame. So we write then read temp file
     dataset.get_file("temp.csv")
     return pd.read_csv("temp.csv")
 
