@@ -25,10 +25,10 @@ st.header("Understanding Churn")
 raw_training_data = get_raw_data()
 training_data_preds = get_preds(raw_training_data)
 
-
 st.write(get_feature_impact(model))
 # Leaving lift chart out because it's hard to understand
 # st.write(get_lift_chart(model))
+
 st.write("---")
 st.header("Targeting Your Anti-Churn Program")
 st.write(
@@ -60,10 +60,4 @@ if uploaded_file is not None:
     uploaded_data_section(uploaded_file, risk_threshold)
 
 st.write("---")
-st.header("Outstanding TODOs")
-st.write(
-    """
-- Let user select accounts for anti-churn effort based on multiple factors (including those in raw data). Not just predicted risk
-- Let user specify uplift assumption and show economic results
-"""
-)
+
